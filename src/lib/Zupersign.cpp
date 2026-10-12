@@ -82,7 +82,10 @@ int zsign_sign(
         success = asset.Init(
             cert, pkey, "",
             string(static_cast<const char *>(entitlements[i].data), entitlements[i].len),
-            is_adhoc, false, false
+            // Real signatures get a single SHA-256 CodeDirectory, as codesign emits for deployment
+            // targets of iOS 11 / macOS 10.13 and later. App Store Connect rejects the SHA-1 primary
+            // plus SHA-256 alternate pair with 90034 ("not signed using an Apple submission certificate").
+            is_adhoc, !is_adhoc, false
         );
         if (!success) {
             *exception = strdup("Invalid developer certificate/private key");
